@@ -5,21 +5,10 @@
 class AirQualityWidget {
     constructor() {
         this.widget = new ListWidget()
-        // Increase padding for better visual balance
         this.widget.setPadding(16, 16, 16, 16)
         this.widget.url = "https://pm2_5.nrct.go.th/"
-        // Add subtle gradient background
-        this.widget.backgroundGradient = this.createBackgroundGradient()
-    }
-
-    createBackgroundGradient() {
-        const gradient = new LinearGradient()
-        gradient.locations = [0, 1]
-        gradient.colors = [
-            new Color("#1c1c1e"),
-            new Color("#2c2c2e")
-        ]
-        return gradient
+        // Set clean white background with slight transparency
+        this.widget.backgroundColor = new Color("#FFFFFF", 0.95)
     }
 
     async initialize() {
@@ -36,49 +25,34 @@ class AirQualityWidget {
             this.latitude = location.latitude
             this.longitude = location.longitude
         } catch (error) {
-            // this.latitude = 14.990677499999999
-            // this.longitude = 100.47800949999998
             console.log("Using fallback location")
         }
     }
 
     async createWidget() {
-        // Configure background
-        const bgColor = Color.dynamic(
-            new Color("#FFFFFF", 0.8),
-            new Color("#000000", 0.8)
-        )
-        this.widget.backgroundColor = bgColor
-    
-        // Station info with subtle styling
+        // Station info with minimal styling
         const headerStack = this.widget.addStack()
         headerStack.layoutVertically()
         headerStack.spacing = 2
-    
+
         const stationName = headerStack.addText(this.stationData.dustboy_name_en)
         stationName.font = Font.semiboldSystemFont(11)
         stationName.minimumScaleFactor = 0.7
         stationName.lineLimit = 1
-        stationName.textColor = Color.dynamic(
-            new Color("#000000", 0.8),
-            new Color("#FFFFFF", 0.8)
-        )
-    
+        stationName.textColor = new Color("#000000", 0.8)
+
         const distanceText = headerStack.addText(`${parseFloat(this.stationData.distance).toFixed(1)} km`)
         distanceText.font = Font.systemFont(10)
-        distanceText.textColor = Color.dynamic(
-            new Color("#666666"),
-            new Color("#999999")
-        )
-    
-        this.widget.addSpacer(8)
-    
-        // Main metrics display
+        distanceText.textColor = new Color("#666666", 0.8)
+
+        this.widget.addSpacer(10)
+
+        // Main metrics display with enhanced spacing
         const metricsStack = this.widget.addStack()
         metricsStack.layoutHorizontally()
         metricsStack.centerAlignContent()
-        metricsStack.spacing = 20
-    
+        metricsStack.spacing = 24 // Increased spacing between metrics
+
         // PM2.5 Value
         const pmStack = this.createMetricStack(
             metricsStack,
@@ -86,7 +60,7 @@ class AirQualityWidget {
             this.stationData.pm25.toString(),
             this.stationData.us_aqi
         )
-    
+
         // US AQI Value
         const aqiStack = this.createMetricStack(
             metricsStack,
@@ -94,10 +68,10 @@ class AirQualityWidget {
             this.stationData.us_aqi,
             this.stationData.us_aqi
         )
-    
-        this.widget.addSpacer(8)
-    
-        // Status indicator
+
+        this.widget.addSpacer(10)
+
+        // Status indicator with refined styling
         const statusStack = this.widget.addStack()
         statusStack.layoutHorizontally()
         statusStack.centerAlignContent()
@@ -110,44 +84,34 @@ class AirQualityWidget {
         
         const statusText = statusStack.addText(this.stationData.us_title_en)
         statusText.font = Font.mediumSystemFont(12)
-        statusText.textColor = Color.dynamic(
-            new Color("#000000", 0.8),
-            new Color("#FFFFFF", 0.8)
-        )
-    
-        // Minimal signature
-        this.widget.addSpacer(4)
+        statusText.textColor = new Color("#000000", 0.7)
+
+        // Refined signature
+        this.widget.addSpacer(6)
         const signature = this.widget.addText("@ingpawat")
         signature.font = Font.systemFont(8)
-        signature.textColor = Color.dynamic(
-            new Color("#666666", 0.6),
-            new Color("#999999", 0.6)
-        )
+        signature.textColor = new Color("#666666", 0.5)
         signature.centerAlignText()
     }
 
     createMetricStack(parentStack, label, value, aqiValue) {
         const stack = parentStack.addStack()
         stack.layoutVertically()
-        stack.spacing = 2
+        stack.spacing = 3
         stack.centerAlignContent()
-    
+
         const labelText = stack.addText(label)
         labelText.font = Font.mediumSystemFont(11)
-        labelText.textColor = Color.dynamic(
-            new Color("#666666"),
-            new Color("#999999")
-        )
+        labelText.textColor = new Color("#666666", 0.8)
         labelText.centerAlignText()
-    
+
         const valueText = stack.addText(value)
-        valueText.font = Font.boldMonospacedSystemFont(24)
+        valueText.font = Font.boldMonospacedSystemFont(26) // Increased size
         valueText.textColor = new Color('#' + this.getAQIColor(aqiValue))
         valueText.centerAlignText()
-    
+
         return stack
     }
-    
 
     async fetchPMData() {
         let url = `https://www-old.cmuccdc.org/api2/dustboy/near/${this.latitude}/${this.longitude}`
@@ -158,26 +122,12 @@ class AirQualityWidget {
 
     getAQIColor(value) {
         value = parseInt(value)
-        if (value <= 50) return '65c64c'
-        if (value <= 100) return 'c6bf22'
-        if (value <= 150) return 'dfce60'
-        if (value <= 200) return 'e39d64'
-        if (value <= 300) return 'b74d34'
-        return '800000'
-    }
-
-    async getImage(image) {
-        let fm = FileManager.local()
-        let dir = fm.documentsDirectory()
-        let path = fm.joinPath(dir, image)
-        if (fm.fileExists(path)) {
-            return fm.readImage(path)
-        } else {
-            let imageUrl = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNkOTI3MmUiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1jcm9zcy1zcXVhcmUiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgeD0iMiIgeT0iMiIgcng9IjMiLz48cGF0aCBkPSJNMTQgMTBWN2MwLS42LS40LTEtMS0xaC0yYy0uNiAwLTEgLjQtMSAxdjNIN2MtLjYgMC0xIC40LTEgMXYyYzAgLjYuNCAxIDEgMWgzdjNjMCAuNi40IDEgMSAxaDJjLjYgMCAxLS40IDEtMXYtM2gzYy42IDAgMS0uNCAxLTF2LTJjMC0uNi0uNC0xLTEtMVoiLz48L3N2Zz4="
-            let iconImage = await this.loadImage(imageUrl)
-            fm.writeImage(path, iconImage)
-            return iconImage
-        }
+        if (value <= 50) return '3EC562' // Brighter green
+        if (value <= 100) return 'FDD74B' // Brighter yellow
+        if (value <= 150) return 'FB9B57' // Brighter orange
+        if (value <= 200) return 'F65E5E' // Brighter red
+        if (value <= 300) return 'A070B6' // Brighter purple
+        return '7D1A1A' // Darker maroon
     }
 
     async loadImage(imgUrl) {
