@@ -30,19 +30,33 @@ class AirQualityWidget {
 
     this.widget.url = "https://pm2_5.nrct.go.th/pmhours";
 
-    // Fixed thresholds according to specifications
     this.colors = {
-      "Very Unhealthy": { bg: "#FF0000", text: "#FFFFFF", threshold: 75.1 },
-      "Unhealthy for Sensitive Groups": {
-        bg: "#FF7E00",
-        text: "#000000",
-        threshold: 37.6,
+      "Very Unhealthy": { 
+        bg: "#8B0000",  // Dark Red
+        text: "#FFFFFF", 
+        threshold: 75.1 
       },
-      Moderate: { bg: "#FFFF00", text: "#000000", threshold: 25.1 },
-      Good: { bg: "#00FF00", text: "#000000", threshold: 15.1 },
-      "Very Good": { bg: "#00CC00", text: "#000000", threshold: 0 },
+      "Unhealthy": { 
+        bg: "#FF4500",  // Intense Red-Orange
+        text: "#FFFFFF", 
+        threshold: 37.6 
+      },
+      "Unhealthy for Sensitive Groups": { 
+        bg: "#FFA500",  // Orange
+        text: "#000000", 
+        threshold: 25.1 
+      },
+      "Moderate": { 
+        bg: "#A6CE39",  // Light Green
+        text: "#000000", 
+        threshold: 15.1 
+      },
+      "Good": { 
+        bg: "#66B32D",  // Green
+        text: "#FFFFFF", 
+        threshold: 0 
+      }
     };
-
     this.cacheKey = "AirQualityWidgetData";
     this.cacheExpiry = 60 * this.config.updateInterval * 1000;
   }
