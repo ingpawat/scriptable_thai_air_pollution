@@ -43,71 +43,111 @@ class AirQualityWidget {
     }
 
     async createWidget() {
-        // Header with station name
-        let stationStack = this.widget.addStack()
-        stationStack.layoutVertically()
-        
-        let stationName = stationStack.addText(this.stationData.dustboy_name_en)
-        stationName.font = Font.mediumRoundedSystemFont(12)
-        stationName.minimumScaleFactor = 0.5
-        stationName.lineLimit = 2
-        stationName.textColor = Color.white()
-        
-        let distanceText = stationStack.addText(`${parseFloat(this.stationData.distance).toFixed(1)} km away`)
+        // Configure background
+        const bgColor = Color.dynamic(
+            new Color("#FFFFFF", 0.8),
+            new Color("#000000", 0.8)
+        )
+        this.widget.backgroundColor = bgColor
+    
+        // Station info with subtle styling
+        const headerStack = this.widget.addStack()
+        headerStack.layoutVertically()
+        headerStack.spacing = 2
+    
+        const stationName = headerStack.addText(this.stationData.dustboy_name_en)
+        stationName.font = Font.semiboldSystemFont(11)
+        stationName.minimumScaleFactor = 0.7
+        stationName.lineLimit = 1
+        stationName.textColor = Color.dynamic(
+            new Color("#000000", 0.8),
+            new Color("#FFFFFF", 0.8)
+        )
+    
+        const distanceText = headerStack.addText(`${parseFloat(this.stationData.distance).toFixed(1)} km`)
         distanceText.font = Font.systemFont(10)
-        distanceText.textColor = new Color("#999999")
+        distanceText.textColor = Color.dynamic(
+            new Color("#666666"),
+            new Color("#999999")
+        )
+    
+        this.widget.addSpacer(8)
+    
+        // Main metrics display
+        const metricsStack = this.widget.addStack()
+        metricsStack.layoutHorizontally()
+        metricsStack.centerAlignContent()
+        metricsStack.spacing = 20
+    
+        // PM2.5 Value
+        const pmStack = this.createMetricStack(
+            metricsStack,
+            "PM2.5",
+            this.stationData.pm25.toString(),
+            this.stationData.us_aqi
+        )
+    
+        // US AQI Value
+        const aqiStack = this.createMetricStack(
+            metricsStack,
+            "AQI",
+            this.stationData.us_aqi,
+            this.stationData.us_aqi
+        )
+    
+        this.widget.addSpacer(8)
+    
+        // Status indicator
+        const statusStack = this.widget.addStack()
+        statusStack.layoutHorizontally()
+        statusStack.centerAlignContent()
         
-        this.widget.addSpacer(12)
-
-        // Main data display
-        let dataStack = this.widget.addStack()
-        dataStack.layoutHorizontally()
-        dataStack.centerAlignContent()
+        const statusDot = statusStack.addText("●")
+        statusDot.font = Font.boldSystemFont(8)
+        statusDot.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
         
-        // Left side - PM2.5
-        let pmStack = dataStack.addStack()
-        pmStack.layoutVertically()
-        pmStack.spacing = 4
+        statusStack.addSpacer(4)
         
-        let pmLabel = pmStack.addText("PM2.5")
-        pmLabel.font = Font.mediumRoundedSystemFont(13)
-        pmLabel.textColor = new Color("#999999")
-        
-        let pmValue = pmStack.addText(this.stationData.pm25.toString())
-        pmValue.font = Font.boldMonospacedSystemFont(22)
-        pmValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
-        
-        dataStack.addSpacer(null)
-
-        // Right side - US AQI
-        let aqiStack = dataStack.addStack()
-        aqiStack.layoutVertically()
-        aqiStack.spacing = 4
-        
-        let aqiLabel = aqiStack.addText("US AQI")
-        aqiLabel.font = Font.mediumRoundedSystemFont(13)
-        aqiLabel.textColor = new Color("#999999")
-        
-        let aqiValue = aqiStack.addText(this.stationData.us_aqi)
-        aqiValue.font = Font.boldMonospacedSystemFont(22)
-        aqiValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
-
-        this.widget.addSpacer(12)
-
-        // Status
-        let statusText = this.widget.addText(this.stationData.us_title_en)
-        statusText.font = Font.mediumRoundedSystemFont(13)
-        statusText.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
-        statusText.centerAlignText()
-
-        // Signature
+        const statusText = statusStack.addText(this.stationData.us_title_en)
+        statusText.font = Font.mediumSystemFont(12)
+        statusText.textColor = Color.dynamic(
+            new Color("#000000", 0.8),
+            new Color("#FFFFFF", 0.8)
+        )
+    
+        // Minimal signature
         this.widget.addSpacer(4)
-        let signatureText = this.widget.addText("Made by - @ingpawat")
-        signatureText.font = Font.systemFont(9)
-        signatureText.textColor = new Color("#666666")
-        signatureText.textOpacity = 0.8
-        signatureText.centerAlignText()
+        const signature = this.widget.addText("@ingpawat")
+        signature.font = Font.systemFont(8)
+        signature.textColor = Color.dynamic(
+            new Color("#666666", 0.6),
+            new Color("#999999", 0.6)
+        )
+        signature.centerAlignText()
     }
+
+    createMetricStack(parentStack, label, value, aqiValue) {
+        const stack = parentStack.addStack()
+        stack.layoutVertically()
+        stack.spacing = 2
+        stack.centerAlignContent()
+    
+        const labelText = stack.addText(label)
+        labelText.font = Font.mediumSystemFont(11)
+        labelText.textColor = Color.dynamic(
+            new Color("#666666"),
+            new Color("#999999")
+        )
+        labelText.centerAlignText()
+    
+        const valueText = stack.addText(value)
+        valueText.font = Font.boldMonospacedSystemFont(24)
+        valueText.textColor = new Color('#' + this.getAQIColor(aqiValue))
+        valueText.centerAlignText()
+    
+        return stack
+    }
+    
 
     async fetchPMData() {
         let url = `https://www-old.cmuccdc.org/api2/dustboy/near/${this.latitude}/${this.longitude}`
