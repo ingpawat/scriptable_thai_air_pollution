@@ -14,6 +14,10 @@ class AirQualityWidget {
                 latitude: 7.1897,
                 longitude: 100.5954
             },
+            symbols: {
+                location: "mappin.circle.fill",
+                logo: "light.min"
+            },
             ...config
         };
 
@@ -36,7 +40,7 @@ class AirQualityWidget {
         };
 
         this.cacheKey = 'AirQualityWidgetData';
-        this.cacheExpiry = 60 * this.config.updateInterval * 1000; // Convert minutes to milliseconds
+        this.cacheExpiry = 60 * this.config.updateInterval * 1000;
     }
 
     getAirQualityStatus(pm25) {
@@ -137,12 +141,21 @@ class AirQualityWidget {
     async createWidget() {
         const { text } = this.getColors(this.stationData.pm25);
         
-        // Header
+        // Header with logo
         const headerStack = this.widget.addStack();
         headerStack.layoutVertically();
         headerStack.spacing = 2;
 
-        const qualityLabel = headerStack.addText("AIR QUALITY");
+        const titleStack = headerStack.addStack();
+        titleStack.centerAlignContent();
+        titleStack.spacing = 4;
+
+        const logoSymbol = SFSymbol.named(this.config.symbols.logo);
+        const logoImage = titleStack.addImage(logoSymbol.image);
+        logoImage.imageSize = new Size(10, 10);
+        logoImage.tintColor = new Color(text);
+
+        const qualityLabel = titleStack.addText("AIR QUALITY 🇹🇭");
         qualityLabel.font = Font.mediumSystemFont(8);
         qualityLabel.textColor = new Color(text);
 
@@ -168,17 +181,26 @@ class AirQualityWidget {
 
         this.widget.addSpacer(4);
 
-        // Station info
+        // Station info with location symbol
         const infoStack = this.widget.addStack();
         infoStack.layoutVertically();
         infoStack.spacing = 2;
+
+        const locationStack = infoStack.addStack();
+        locationStack.centerAlignContent();
+        locationStack.spacing = 4;
+
+        const locationSymbol = SFSymbol.named(this.config.symbols.location);
+        const locationIcon = locationStack.addImage(locationSymbol.image);
+        locationIcon.imageSize = new Size(12, 12);
+        locationIcon.tintColor = new Color(text);
 
         const locationName = this.stationData.dustboy_name_en;
         const truncatedLocation = locationName.length > 25 
             ? locationName.substring(0, 25) + '...' 
             : locationName;
 
-        const locationText = infoStack.addText(truncatedLocation);
+        const locationText = locationStack.addText(truncatedLocation);
         locationText.font = Font.mediumSystemFont(9);
         locationText.textColor = new Color(text);
         locationText.lineLimit = 1;
@@ -203,7 +225,7 @@ class AirQualityWidget {
         this.widget.addSpacer(2);
         const signature = this.widget.addText("Made by @ingpawat");
         signature.font = Font.systemFont(6);
-        signature.textColor = new Color("#666666", 0.5);
+        signature.textColor = new Color("#666666", 0.7);
         signature.centerAlignText();
     }
 
