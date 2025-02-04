@@ -11,7 +11,7 @@ class AirQualityWidget {
 
     async initialize() {
         await this.setLocation()
-        this.indexData = await this.fetchPMData()
+        this.stationData = await this.fetchPMData()
         await this.createWidget()
         return this.widget
     }
@@ -23,7 +23,6 @@ class AirQualityWidget {
             this.latitude = location.latitude
             this.longitude = location.longitude
         } catch (error) {
-            // Fallback coordinates if location access is denied
             this.latitude = 14.990677499999999
             this.longitude = 100.47800949999998
             console.log("Using fallback location")
@@ -31,62 +30,72 @@ class AirQualityWidget {
     }
 
     async createWidget() {
-        let titleStack = this.widget.addStack()
-        const icon = await this.getImage('dust')
-        const iconImg = titleStack.addImage(icon)
-        iconImg.imageSize = new Size(30, 30)
+        // Header with station name
+        let stationStack = this.widget.addStack()
+        stationStack.layoutVertically()
         
-        titleStack.layoutHorizontally()
-        titleStack.addSpacer(8)
-
-        let textStack = titleStack.addStack()
-        textStack.layoutVertically()
-
-        let title = textStack.addText("Air Quality")
-        title.font = Font.mediumRoundedSystemFont(13)
-        let subtitle = textStack.addText("PM2.5 Index")
-        subtitle.font = Font.mediumRoundedSystemFont(13)
-
-        this.widget.addSpacer(10)
-
-        let row = this.widget.addStack()
-        row.layoutHorizontally()
-
-        let pmText = row.addText("PM2.5: ")
-        pmText.font = Font.mediumRoundedSystemFont(18)
+        let stationName = stationStack.addText(this.stationData.dustboy_name_en)
+        stationName.font = Font.mediumRoundedSystemFont(12)
+        stationName.minimumScaleFactor = 0.5
+        stationName.lineLimit = 2
         
-        let pmValue = row.addText(this.indexData.toString())
-        pmValue.textColor = new Color('#' + this.getAQIColor(this.indexData))
-        pmValue.font = Font.regularMonospacedSystemFont(18)
+        let distanceText = stationStack.addText(`${parseFloat(this.stationData.distance).toFixed(1)} km away`)
+        distanceText.font = Font.systemFont(10)
+        distanceText.textColor = Color.gray()
+        
+        this.widget.addSpacer(8)
 
-        let status = this.widget.addText(this.getAQIStatus(this.indexData))
-        status.textColor = new Color('#' + this.getAQIColor(this.indexData))
-        status.font = Font.regularMonospacedSystemFont(18)
+        // Main data display
+        let dataStack = this.widget.addStack()
+        dataStack.layoutHorizontally()
+        
+        // Left side - PM2.5
+        let pmStack = dataStack.addStack()
+        pmStack.layoutVertically()
+        
+        let pmLabel = pmStack.addText("PM2.5")
+        pmLabel.font = Font.mediumRoundedSystemFont(13)
+        
+        let pmValue = pmStack.addText(this.stationData.pm25.toString())
+        pmValue.font = Font.boldMonospacedSystemFont(20)
+        pmValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
+        
+        dataStack.addSpacer()
+
+        // Right side - US AQI
+        let aqiStack = dataStack.addStack()
+        aqiStack.layoutVertically()
+        
+        let aqiLabel = aqiStack.addText("US AQI")
+        aqiLabel.font = Font.mediumRoundedSystemFont(13)
+        
+        let aqiValue = aqiStack.addText(this.stationData.us_aqi)
+        aqiValue.font = Font.boldMonospacedSystemFont(20)
+        aqiValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
+
+        this.widget.addSpacer(8)
+
+        // Status
+        let statusText = this.widget.addText(this.stationData.us_title_en)
+        statusText.font = Font.mediumRoundedSystemFont(13)
+        statusText.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
     }
 
     async fetchPMData() {
         let url = `https://www-old.cmuccdc.org/api2/dustboy/near/${this.latitude}/${this.longitude}`
         const req = new Request(url)
         const apiResult = await req.loadJSON()
-        return apiResult[0].pm25
+        return apiResult[0]
     }
 
     getAQIColor(value) {
+        value = parseInt(value)
         if (value <= 50) return '65c64c'
         if (value <= 100) return 'c6bf22'
         if (value <= 150) return 'dfce60'
         if (value <= 200) return 'e39d64'
         if (value <= 300) return 'b74d34'
         return '800000'
-    }
-
-    getAQIStatus(value) {
-        if (value <= 50) return "Good"
-        if (value <= 100) return "Moderate"
-        if (value <= 150) return "Unhealthy for Sensitive Groups"
-        if (value <= 200) return "Unhealthy"
-        if (value <= 300) return "Very Unhealthy"
-        return "Hazardous"
     }
 
     async getImage(image) {
