@@ -15,7 +15,7 @@ class AirQualityWidget {
                 longitude: 100.5954
             },
             symbols: {
-                location: "mappin.circle.fill",
+                location: "pin",
                 logo: "light.min"
             },
             ...config
@@ -28,7 +28,7 @@ class AirQualityWidget {
             this.config.padding
         );
         
-        this.widget.url = "https://pm2_5.nrct.go.th/";
+        this.widget.url = "https://pm2_5.nrct.go.th/pmhours";
         
         this.colors = {
             Hazardous: { bg: '#4C1036', text: '#FFFFFF', threshold: 300.5 },
@@ -155,10 +155,14 @@ class AirQualityWidget {
         logoImage.imageSize = new Size(10, 10);
         logoImage.tintColor = new Color(text);
 
-        const qualityLabel = titleStack.addText("AIR QUALITY 🇹🇭");
+        const flagLabel = titleStack.addText("🇹🇭");
+        flagLabel.font = Font.mediumSystemFont(10);
+        flagLabel.textColor = new Color(text);
+
+        const qualityLabel = titleStack.addText("AIR QUALITY");
         qualityLabel.font = Font.mediumSystemFont(8);
         qualityLabel.textColor = new Color(text);
-
+        
         const statusText = headerStack.addText(this.getAirQualityStatus(this.stationData.pm25));
         statusText.font = Font.semiboldSystemFont(12);
         statusText.textColor = new Color(text);
