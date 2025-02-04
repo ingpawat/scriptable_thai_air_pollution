@@ -5,8 +5,21 @@
 class AirQualityWidget {
     constructor() {
         this.widget = new ListWidget()
-        this.widget.setPadding(10, 10, 10, 10)
-        this.widget.url = 'https://pm2_5.nrct.go.th/'
+        // Increase padding for better visual balance
+        this.widget.setPadding(16, 16, 16, 16)
+        this.widget.url = "https://pm2_5.nrct.go.th/"
+        // Add subtle gradient background
+        this.widget.backgroundGradient = this.createBackgroundGradient()
+    }
+
+    createBackgroundGradient() {
+        const gradient = new LinearGradient()
+        gradient.locations = [0, 1]
+        gradient.colors = [
+            new Color("#1c1c1e"),
+            new Color("#2c2c2e")
+        ]
+        return gradient
     }
 
     async initialize() {
@@ -38,47 +51,62 @@ class AirQualityWidget {
         stationName.font = Font.mediumRoundedSystemFont(12)
         stationName.minimumScaleFactor = 0.5
         stationName.lineLimit = 2
+        stationName.textColor = Color.white()
         
         let distanceText = stationStack.addText(`${parseFloat(this.stationData.distance).toFixed(1)} km away`)
         distanceText.font = Font.systemFont(10)
-        distanceText.textColor = Color.gray()
+        distanceText.textColor = new Color("#999999")
         
-        this.widget.addSpacer(8)
+        this.widget.addSpacer(12)
 
         // Main data display
         let dataStack = this.widget.addStack()
         dataStack.layoutHorizontally()
+        dataStack.centerAlignContent()
         
         // Left side - PM2.5
         let pmStack = dataStack.addStack()
         pmStack.layoutVertically()
+        pmStack.spacing = 4
         
         let pmLabel = pmStack.addText("PM2.5")
         pmLabel.font = Font.mediumRoundedSystemFont(13)
+        pmLabel.textColor = new Color("#999999")
         
         let pmValue = pmStack.addText(this.stationData.pm25.toString())
-        pmValue.font = Font.boldMonospacedSystemFont(20)
+        pmValue.font = Font.boldMonospacedSystemFont(22)
         pmValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
         
-        dataStack.addSpacer()
+        dataStack.addSpacer(null)
 
         // Right side - US AQI
         let aqiStack = dataStack.addStack()
         aqiStack.layoutVertically()
+        aqiStack.spacing = 4
         
         let aqiLabel = aqiStack.addText("US AQI")
         aqiLabel.font = Font.mediumRoundedSystemFont(13)
+        aqiLabel.textColor = new Color("#999999")
         
         let aqiValue = aqiStack.addText(this.stationData.us_aqi)
-        aqiValue.font = Font.boldMonospacedSystemFont(20)
+        aqiValue.font = Font.boldMonospacedSystemFont(22)
         aqiValue.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
 
-        this.widget.addSpacer(8)
+        this.widget.addSpacer(12)
 
         // Status
         let statusText = this.widget.addText(this.stationData.us_title_en)
         statusText.font = Font.mediumRoundedSystemFont(13)
         statusText.textColor = new Color('#' + this.getAQIColor(this.stationData.us_aqi))
+        statusText.centerAlignText()
+
+        // Signature
+        this.widget.addSpacer(4)
+        let signatureText = this.widget.addText("Made by - @ingpawat")
+        signatureText.font = Font.systemFont(9)
+        signatureText.textColor = new Color("#666666")
+        signatureText.textOpacity = 0.8
+        signatureText.centerAlignText()
     }
 
     async fetchPMData() {
