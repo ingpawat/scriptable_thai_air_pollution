@@ -11,8 +11,8 @@ class AirQualityWidget {
             padding: config.padding || 12,
             updateInterval: config.updateInterval || 30, // minutes
             fallbackLocation: {
-                latitude: 13.7563,
-                longitude: 100.5018
+                latitude: 7.1897,
+                longitude: 100.5954
             },
             ...config
         };
