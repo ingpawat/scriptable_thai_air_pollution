@@ -6,7 +6,7 @@
 class AirQualityWidget {
     constructor() {
         this.widget = new ListWidget();
-        this.widget.setPadding(16, 16, 16, 16);
+        this.widget.setPadding(12, 12, 12, 12);
         this.widget.url = "https://pm2_5.nrct.go.th/";
         this.colors = {
             Hazardous: { bg: '#4C1036', text: '#FFFFFF' },
@@ -55,67 +55,71 @@ class AirQualityWidget {
     async createWidget() {
         const { text } = this.getColors(this.stationData.us_title_en);
         
-        // Header
+        // Header - Compact layout
         const headerStack = this.widget.addStack();
-        headerStack.layoutHorizontally();
-        headerStack.centerAlignContent();
+        headerStack.layoutVertically();
+        headerStack.spacing = 2;
 
-        const titleStack = headerStack.addStack();
-        titleStack.layoutVertically();
-        
-        const qualityLabel = titleStack.addText("AIR QUALITY");
-        qualityLabel.font = Font.mediumSystemFont(10);
+        const qualityLabel = headerStack.addText("AIR QUALITY");
+        qualityLabel.font = Font.mediumSystemFont(8);
         qualityLabel.textColor = new Color(text);
 
-        const statusText = titleStack.addText(this.stationData.us_title_en);
-        statusText.font = Font.semiboldSystemFont(14);
+        const statusText = headerStack.addText(this.stationData.us_title_en);
+        statusText.font = Font.semiboldSystemFont(12);
         statusText.textColor = new Color(text);
 
-        this.widget.addSpacer(8);
+        this.widget.addSpacer(4);
 
-        // PM2.5 Value
+        // PM2.5 Value - Main focus
         const pm25Stack = this.widget.addStack();
         pm25Stack.layoutVertically();
+        pm25Stack.spacing = 0;
         
         const pm25Label = pm25Stack.addText("PM 2.5");
-        pm25Label.font = Font.mediumSystemFont(10);
+        pm25Label.font = Font.mediumSystemFont(8);
         pm25Label.textColor = new Color(text);
         
-        const pm25Text = pm25Stack.addText(`${this.stationData.pm25} μg/m³`);
-        pm25Text.font = Font.boldSystemFont(32);
+        const pm25Text = pm25Stack.addText(`${this.stationData.pm25} &micro;g/m&sup3;`);
+        pm25Text.font = Font.boldSystemFont(24);
         pm25Text.textColor = new Color(text);
 
-        this.widget.addSpacer(8);
+        this.widget.addSpacer(4);
 
-        // Station Distance
-        const distanceStack = this.widget.addStack();
-        distanceStack.layoutVertically();
-        distanceStack.spacing = 4;
+        // Station info - Compact
+        const infoStack = this.widget.addStack();
+        infoStack.layoutVertically();
+        infoStack.spacing = 2;
 
-        const locationText = distanceStack.addText(this.stationData.dustboy_name_en);
-        locationText.font = Font.mediumSystemFont(12);
+        const locationName = this.stationData.dustboy_name_en;
+        const truncatedLocation = locationName.length > 25 
+            ? locationName.substring(0, 25) + '...' 
+            : locationName;
+
+        const locationText = infoStack.addText(truncatedLocation);
+        locationText.font = Font.mediumSystemFont(9);
         locationText.textColor = new Color(text);
+        locationText.lineLimit = 1;
 
-        const distanceText = distanceStack.addText(
-            `Station Distance: ${parseFloat(this.stationData.distance).toFixed(1)} km`
+        const distanceText = infoStack.addText(
+            `${parseFloat(this.stationData.distance).toFixed(1)} km away`
         );
-        distanceText.font = Font.systemFont(10);
+        distanceText.font = Font.systemFont(8);
         distanceText.textColor = new Color(text, 0.8);
 
-        const timeText = distanceStack.addText(
+        const timeText = infoStack.addText(
             `Updated ${new Date().toLocaleTimeString('en-US', { 
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
             })}`
         );
-        timeText.font = Font.systemFont(10);
+        timeText.font = Font.systemFont(8);
         timeText.textColor = new Color(text, 0.8);
 
-        // Signature
-        this.widget.addSpacer(6);
-        const signature = this.widget.addText("Made by @ingpawat");
-        signature.font = Font.systemFont(8);
+        // Signature - Minimal
+        this.widget.addSpacer(2);
+        const signature = this.widget.addText("@ingpawat");
+        signature.font = Font.systemFont(6);
         signature.textColor = new Color("#666666", 0.5);
         signature.centerAlignText();
     }
