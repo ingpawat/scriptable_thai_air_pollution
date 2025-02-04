@@ -4,9 +4,9 @@
 "use strict";
 
 /**
- * Air Quality Widget
+ * Air Quality Widget for iOS Scriptable
  * Created by @ingpawat
- * A widget to display PM2.5 and AQI data from nearby air quality stations
+ * Displays PM2.5 and AQI data from nearby air quality stations
  * Using CMUCCDC API
  */
 

@@ -485,34 +485,7 @@ async function run() {
   listWidget.useDefaultPadding();
 
   try {
-    if (!API_KEY || API_KEY === "your-api-key-goes-here") {
-      throw `You need a PurpleAir API Key for this widget.`;
-    }
 
-    const sensorId = await getSensorId();
-
-    if (!sensorId) {
-      throw "Please specify a location for this widget.";
-    }
-    console.log(`Using sensor ID: ${sensorId}`);
-
-    const data = await getSensorData(sensorId);
-
-    const stats = data.val.stats;
-    console.log({ stats });
-
-    const aqiTrend = getAQITrend(stats);
-
-    const epaPM = computePM(data);
-    console.log({ epaPM });
-
-    const aqi = aqiFromPM(epaPM);
-    const level = calculateLevel(aqi);
-    const aqiText = aqi.toString();
-    console.log({ aqi });
-
-    const sensorLocation = await getLocation(data)
-    console.log({ sensorLocation });
 
     const startColor = Color.dynamic(new Color(level.startColor), new Color(level.darkStartColor));
     const endColor = Color.dynamic(new Color(level.endColor), new Color(level.darkEndColor));
