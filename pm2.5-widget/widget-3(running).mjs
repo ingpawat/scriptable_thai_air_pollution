@@ -30,17 +30,17 @@ class AirQualityWidget {
 
     this.widget.url = "https://pm2_5.nrct.go.th/pmhours";
 
+    // Fixed thresholds according to specifications
     this.colors = {
-      Hazardous: { bg: "#4C1036", text: "#FFFFFF", threshold: 300.5 },
-      "Very Unhealthy": { bg: "#8F3F97", text: "#FFFFFF", threshold: 200.5 },
-      Unhealthy: { bg: "#ED3D3D", text: "#FFFFFF", threshold: 150.5 },
+      "Very Unhealthy": { bg: "#FF0000", text: "#FFFFFF", threshold: 75.1 },
       "Unhealthy for Sensitive Groups": {
         bg: "#FF7E00",
         text: "#000000",
-        threshold: 100.5,
+        threshold: 37.6,
       },
-      Moderate: { bg: "#F7D84B", text: "#000000", threshold: 50.5 },
-      Good: { bg: "#3EC562", text: "#000000", threshold: 0 },
+      Moderate: { bg: "#FFFF00", text: "#000000", threshold: 25.1 },
+      Good: { bg: "#00FF00", text: "#000000", threshold: 15.1 },
+      "Very Good": { bg: "#00CC00", text: "#000000", threshold: 0 },
     };
 
     this.cacheKey = "AirQualityWidgetData";
@@ -48,16 +48,21 @@ class AirQualityWidget {
   }
 
   getAirQualityStatus(pm25) {
+    // Sort thresholds from highest to lowest
     const thresholds = Object.entries(this.colors).sort(
       (a, b) => b[1].threshold - a[1].threshold
     );
 
+    // Fixed threshold comparison logic
     for (const [status, data] of thresholds) {
-      if (pm25 >= data.threshold) return status;
+      if (parseFloat(pm25) >= data.threshold) {
+        return status;
+      }
     }
-    return "Good";
+    return "Very Good"; // Default if no threshold is met
   }
 
+  // Rest of the class implementation remains the same
   getColors(pm25) {
     const status = this.getAirQualityStatus(pm25);
     return this.colors[status] || this.colors.Moderate;
@@ -140,40 +145,22 @@ class AirQualityWidget {
     }
   }
 
-  /**
-   * Creates and configures the widget layout for displaying air quality information
-   * The widget is structured in three main sections:
-   * 1. Header (Logo, Flag, and Air Quality Status)
-   * 2. PM2.5 Value Display
-   * 3. Station Information
-   */
   async createWidget() {
-    // Get the text color based on current air quality level
     const { text } = this.getColors(this.stationData.pm25);
 
-    // ===== HEADER SECTION =====
-    // Create main header stack with vertical layout
+    // Header Section
     const headerStack = this.widget.addStack();
     headerStack.layoutVertically();
     headerStack.spacing = 3;
 
-    // Create horizontal stack for title elements
     const titleStack = headerStack.addStack();
     titleStack.centerAlignContent();
     titleStack.spacing = 4;
 
-    // Add logo symbol (light.min SF Symbol)
-    // const logoSymbol = SFSymbol.named(this.config.symbols.logo);
-    // const logoImage = titleStack.addImage(logoSymbol.image);
-    // logoImage.imageSize = new Size(10, 10);
-    // logoImage.tintColor = new Color(text);
-
-    // Add "AIR QUALITY" text
     const qualityLabel = titleStack.addText("THAILAND AIR QUALITY 🇹🇭");
     qualityLabel.font = Font.mediumSystemFont(8);
     qualityLabel.textColor = new Color(text);
 
-    // Add current air quality status
     const statusText = headerStack.addText(
       this.getAirQualityStatus(this.stationData.pm25)
     );
@@ -182,18 +169,15 @@ class AirQualityWidget {
 
     this.widget.addSpacer(4);
 
-    // ===== PM2.5 VALUE SECTION =====
-    // Create stack for PM2.5 value display
+    // PM2.5 Value Section
     const pm25Stack = this.widget.addStack();
     pm25Stack.layoutVertically();
     pm25Stack.spacing = 0;
 
-    // Add "PM 2.5" label
     const pm25Label = pm25Stack.addText("PM 2.5");
     pm25Label.font = Font.mediumSystemFont(8);
     pm25Label.textColor = new Color(text);
 
-    // Add PM2.5 value with unit
     const pm25Value = Math.round(this.stationData.pm25 * 10) / 10;
     const pm25Text = pm25Stack.addText(`${pm25Value} μg/m³`);
     pm25Text.font = Font.boldSystemFont(24);
@@ -201,24 +185,20 @@ class AirQualityWidget {
 
     this.widget.addSpacer(4);
 
-    // ===== STATION INFORMATION SECTION =====
-    // Create main info stack
+    // Station Information Section
     const infoStack = this.widget.addStack();
     infoStack.layoutVertically();
     infoStack.spacing = 2;
 
-    // Create horizontal stack for location info
     const locationStack = infoStack.addStack();
     locationStack.centerAlignContent();
     locationStack.spacing = 4;
 
-    // Add location pin symbol
     const locationSymbol = SFSymbol.named(this.config.symbols.location);
     const locationIcon = locationStack.addImage(locationSymbol.image);
     locationIcon.imageSize = new Size(12, 12);
     locationIcon.tintColor = new Color(text);
 
-    // Add station name (truncated if too long)
     const locationName = this.stationData.dustboy_name_en;
     const truncatedLocation =
       locationName.length > 25
@@ -230,14 +210,12 @@ class AirQualityWidget {
     locationText.textColor = new Color(text);
     locationText.lineLimit = 1;
 
-    // Add distance information
     const distanceText = infoStack.addText(
       `${parseFloat(this.stationData.distance).toFixed(1)} km away`
     );
     distanceText.font = Font.systemFont(8);
     distanceText.textColor = new Color(text, 0.8);
 
-    // Add last update time
     const timeText = infoStack.addText(
       `Updated ${new Date().toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -248,8 +226,7 @@ class AirQualityWidget {
     timeText.font = Font.systemFont(8);
     timeText.textColor = new Color(text, 0.8);
 
-    // ===== SIGNATURE =====
-    // Add creator signature at the bottom
+    // Signature
     this.widget.addSpacer(2);
     const signature = this.widget.addText("Made by @ingpawat");
     signature.font = Font.systemFont(6);
