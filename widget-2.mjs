@@ -36,8 +36,8 @@ class AirQualityWidget {
             this.latitude = location.latitude
             this.longitude = location.longitude
         } catch (error) {
-            this.latitude = 14.990677499999999
-            this.longitude = 100.47800949999998
+            // this.latitude = 14.990677499999999
+            // this.longitude = 100.47800949999998
             console.log("Using fallback location")
         }
     }
