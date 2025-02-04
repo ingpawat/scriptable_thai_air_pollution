@@ -71,39 +71,42 @@ class AirQualityWidget {
         statusText.font = Font.semiboldSystemFont(14);
         statusText.textColor = new Color(text);
 
-        // Decorative dots
-        headerStack.addSpacer();
-        const dotsStack = headerStack.addStack();
-        dotsStack.layoutHorizontally();
-        dotsStack.spacing = 4;
-        for (let i = 0; i < 3; i++) {
-            const dot = dotsStack.addText("●");
-            dot.font = Font.boldSystemFont(6);
-            dot.textColor = new Color(text, 0.5);
-        }
+        this.widget.addSpacer(8);
+
+        // PM2.5 Value
+        const pm25Stack = this.widget.addStack();
+        pm25Stack.layoutVertically();
+        
+        const pm25Label = pm25Stack.addText("PM 2.5");
+        pm25Label.font = Font.mediumSystemFont(10);
+        pm25Label.textColor = new Color(text);
+        
+        const pm25Text = pm25Stack.addText(`${this.stationData.pm25} μg/m³`);
+        pm25Text.font = Font.boldSystemFont(32);
+        pm25Text.textColor = new Color(text);
 
         this.widget.addSpacer(8);
 
-        // AQI Value
-        const aqiText = this.widget.addText(this.stationData.us_aqi.toString());
-        aqiText.font = Font.boldSystemFont(32);
-        aqiText.textColor = new Color(text);
+        // Station Distance
+        const distanceStack = this.widget.addStack();
+        distanceStack.layoutVertically();
+        distanceStack.spacing = 4;
 
-        this.widget.addSpacer(8);
-
-        // Location and Time
-        const locationStack = this.widget.addStack();
-        locationStack.layoutVertically();
-        locationStack.spacing = 4;
-
-        const locationText = locationStack.addText(this.stationData.dustboy_name_en);
+        const locationText = distanceStack.addText(this.stationData.dustboy_name_en);
         locationText.font = Font.mediumSystemFont(12);
         locationText.textColor = new Color(text);
 
-        const timeText = locationStack.addText(
+        const distanceText = distanceStack.addText(
+            `Station Distance: ${parseFloat(this.stationData.distance).toFixed(1)} km`
+        );
+        distanceText.font = Font.systemFont(10);
+        distanceText.textColor = new Color(text, 0.8);
+
+        const timeText = distanceStack.addText(
             `Updated ${new Date().toLocaleTimeString('en-US', { 
-                hour: 'numeric', 
-                minute: '2-digit'
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
             })}`
         );
         timeText.font = Font.systemFont(10);
@@ -111,7 +114,7 @@ class AirQualityWidget {
 
         // Signature
         this.widget.addSpacer(6);
-        const signature = this.widget.addText("@ingpawat");
+        const signature = this.widget.addText("Made by @ingpawat");
         signature.font = Font.systemFont(8);
         signature.textColor = new Color("#666666", 0.5);
         signature.centerAlignText();
